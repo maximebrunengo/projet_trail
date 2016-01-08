@@ -1,82 +1,40 @@
-close all; 
-clear all;
-clc;
+function [ Coureur ] = main( Coureur, Nom, Prenom, trk )
 
-trk = gpxread('../data/draftrunwithD', 'FeatureType', 'track');
+    Nom_coureur = Nom;
+    Prenom_coureur = Prenom;
 
-% Classement des points
-dist=0;
-cpt_portion = 1;
-portion = struct;
-cpt_test = 0;
-for i=2:size(trk,1)
-    
-    %dist = dist+computeDistance(trk(i),trk(i-1));
-    
-    % Compute elevation between the curent point and the previous point
-    elevation_crt = trk(i).Elevation-trk(i-1).Elevation;
-    
-    % Compute distance
-    portion(cpt_portion).Distance = computeDistance(trk(i),trk(i-1));
-    
-    % Compute elevation
-    portion(cpt_portion).Slope = 100*asin(elevation_crt/portion(cpt_portion).Distance);
-    
-    % Compute duration
-    timeStr_crt = strrep(trk(i).Time, 'T', ' ');
-    timeStr_crt = strrep(timeStr_crt, 'Z', '');
-    timeStr_prev = strrep(trk(i-1).Time, 'T', ' ');
-    timeStr_prev = strrep(timeStr_prev, 'Z', '');
-    trk(i).DateNumber = datenum(timeStr_crt, 31);
-    trk(i-1).DateNumber = datenum(timeStr_prev, 31);
-    portion(cpt_portion).Duration = etime(datevec(trk(i).DateNumber), datevec(trk(i-1).DateNumber));
-    
-    % Compute average speed
-    portion(cpt_portion).Speed = 3.6 * portion(cpt_portion).Distance/portion(cpt_portion).Duration;
-    cpt_test = cpt_test + portion(cpt_portion).Speed;
-    
-    % Compute class
-    if elevation_crt < 0
-        portion(cpt_portion).Class = -1;  
-    elseif elevation_crt > 0
-        portion(cpt_portion).Class = 1;
+    [average_speed, distance_done] = computeAverageSpeed(trk);
+
+    %Verifier si le coureur est deja dans la structure Coureur
+    index_coureur = find(strcmp({Coureur.Nom}, Nom_coureur)==1);
+
+    if isempty(index_coureur)
+
+        sizeCoureur = size(Coureur);
+        Coureur(sizeCoureur(1,2)+1).Nom = Nom_coureur;
+        Coureur(sizeCoureur(1,2)+1).Prenom = Prenom_coureur;
+        Coureur(sizeCoureur(1,2)+1).Speed = average_speed;
+        Coureur(sizeCoureur(1,2)+1).DistanceDone = distance_done;
+
     else
-        portion(cpt_portion).Class = 0;
+
+        current_speed = Coureur(index_coureur).Speed;
+        current_distance = Coureur(index_coureur).DistanceDone;
+        new_speed = zeros(1,9);
+        new_distance = zeros(1,9);
+        for i=1:9
+            new_speed(1,i) = (current_speed(1,i)*current_distance(1,i)+average_speed(1,i)*distance_done(1,i))/(current_distance(1,i)+distance_done(1,i));
+            new_distance(1,i) = current_distance(1,i)+distance_done(1,i);
+        end
+
+        Coureur(index_coureur).Speed = new_speed;
+        Coureur(index_coureur).DistanceDone = new_distance;
+
     end
-    
-    cpt_portion = cpt_portion+1;
+
+    % Affichage de la course dont on cherche les vitesses moyennes
+    displayElevation(trk);
 end
 
-% Find all the portions when the runner climbs
-M = find([portion.Class] == 1);
-D = find([portion.Class] == -1);
-P = find([portion.Class] == 0);
-
-% Compute average speed in climbs, descents and flats
-v_M = 0;
-for i=1:size(M,2)
-    cpt = M(1,i);
-    v_M = v_M + (portion(cpt).Speed)/size(M,2);
-end
-
-v_D = 0;
-for i=1:size(D,2)
-    cpt = D(1,i);
-    v_D = v_D + (portion(cpt).Speed)/size(D,2);
-end
-
-v_P = 0;
-for i=1:size(P,2)
-    cpt = P(1,i);
-    v_P = v_P + (portion(cpt).Speed)/size(P,2);
-end
-
-% Display
-disp('Affichage de la vitesse moyenne du coureur en fonction du profil du terrain');
-
-disp(['La vitesse moyenne en montée est ', num2str(v_M), 'km/h']);
-disp(['La vitesse moyenne en descente est ', num2str(v_D), 'km/h']);
-disp(['La vitesse moyenne sur plat est ', num2str(v_P), 'km/h']);
 
 
-displayElevation(trk);

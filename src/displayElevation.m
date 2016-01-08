@@ -7,8 +7,8 @@ function [  ] = displayElevation( trk )
     trk.TimeOfDay = trk.DateNumber - day;
 
     figure
-    minEle = min(trk.Elevation);
-    trk.Elevation = trk.Elevation-minEle;
+    %minEle = min(trk.Elevation);
+    %trk.Elevation = trk.Elevation-minEle;
     area(trk.TimeOfDay, trk.Elevation)
     datetick('x', 13, 'keepticks', 'keeplimits')
     ylabel('elevation (meters)')
