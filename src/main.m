@@ -23,7 +23,11 @@ function [ Coureur ] = main( Coureur, Nom, Prenom, trk )
         new_speed = zeros(1,9);
         new_distance = zeros(1,9);
         for i=1:9
-            new_speed(1,i) = (current_speed(1,i)*current_distance(1,i)+average_speed(1,i)*distance_done(1,i))/(current_distance(1,i)+distance_done(1,i));
+            if current_distance(1,i)+distance_done(1,i) == 0
+                new_speed(1,i) = 0;
+            else
+                new_speed(1,i) = (current_speed(1,i)*current_distance(1,i)+average_speed(1,i)*distance_done(1,i))/(current_distance(1,i)+distance_done(1,i));                
+            end
             new_distance(1,i) = current_distance(1,i)+distance_done(1,i);
         end
 

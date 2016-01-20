@@ -5,14 +5,19 @@ function [ average_speed, distance_done ] = computeAverageSpeed( trk )
     % descente jusqu'à la plus montante.
     average_speed = zeros(1,9);
     distance_done = zeros(1,9);
-
+   
     % Classement des points
     %dist=0;
     cpt_portion = 1;
     portion = struct;
     cpt_test = 0;
     for i=2:size(trk,1)
-
+        
+        % Check things..
+        if isempty(trk(i).Time)
+            trk(i) = trk(i-1);          
+        end
+        
         %dist = dist+computeDistance(trk(i),trk(i-1));
 
         % Compute elevation between the curent point and the previous point
@@ -22,9 +27,13 @@ function [ average_speed, distance_done ] = computeAverageSpeed( trk )
         portion(cpt_portion).Distance = computeDistance(trk(i),trk(i-1));
 
         % Compute elevation
-        portion(cpt_portion).Slope = 100*asin(elevation_crt/portion(cpt_portion).Distance);
+        if portion(cpt_portion).Distance == 0
+            portion(cpt_portion).Slope = 0;
+        else
+            portion(cpt_portion).Slope = 100*asin(elevation_crt/portion(cpt_portion).Distance);
+        end
 
-        % Compute duration
+        % Compute duration         
         timeStr_crt = strrep(trk(i).Time, 'T', ' ');
         timeStr_crt = strrep(timeStr_crt, 'Z', '');
         timeStr_prev = strrep(trk(i-1).Time, 'T', ' ');
@@ -34,9 +43,13 @@ function [ average_speed, distance_done ] = computeAverageSpeed( trk )
         portion(cpt_portion).Duration = etime(datevec(trk(i).DateNumber), datevec(trk(i-1).DateNumber));
 
         % Compute average speed
-        portion(cpt_portion).Speed = 3.6 * portion(cpt_portion).Distance/portion(cpt_portion).Duration;
-        cpt_test = cpt_test + portion(cpt_portion).Speed;
-
+        if portion(cpt_portion).Duration == 0
+            portion(cpt_portion).Speed = 0;
+        else
+            portion(cpt_portion).Speed = 3.6 * portion(cpt_portion).Distance/portion(cpt_portion).Duration;
+            cpt_test = cpt_test + portion(cpt_portion).Speed;
+        end
+        
         % Compute class
         % Plat
         if portion(cpt_portion).Slope <= 5 && portion(cpt_portion).Slope >= -5

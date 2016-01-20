@@ -1,4 +1,4 @@
-function [ timeFromBeginning ] = estimation( Nom, trk )
+function [ timeFromBeginning ] = estimation_inter( Nom, trk, liste_points )
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Estimation d'une course %
@@ -19,7 +19,7 @@ function [ timeFromBeginning ] = estimation( Nom, trk )
 
     timeFromBeginning = 0;
     cpt_portion = 1;
-    distanceFromBeginning = 0;
+    j=1;
     
     for i=2:size(trk,1)
         
@@ -28,7 +28,6 @@ function [ timeFromBeginning ] = estimation( Nom, trk )
 
         % Compute distance
         portion(cpt_portion).Distance = computeDistance(trk(i),trk(i-1));
-        distanceFromBeginning = distanceFromBeginning + portion(cpt_portion).Distance;
         
         % Compute slope
         if portion(cpt_portion).Distance == 0
@@ -82,20 +81,25 @@ function [ timeFromBeginning ] = estimation( Nom, trk )
 
         timeFromBeginning = timeFromBeginning + portion(cpt_portion).TimeNeeded;
         
+        if j<= size(liste_points,2)
+            if trk(i).DistanceFromBeginning >= liste_points(1,j)
+                inter = datestr(timeFromBeginning/86400, 'HH:MM:SS');
+                fprintf('Temps au %5.0f m : %s\n',liste_points(1,j), inter);
+                j=j+1;
+            end
+        end
+        
+        timeEstimate = datestr(timeFromBeginning/86400, 'HH:MM:SS');
+
         cpt_portion = cpt_portion+1;
     end
-    
-%     if distanceFromBeginning > 40000
-%         timeFromBeginning = timeFromBeginning*1.18;
-%     end
-    
-    timeEstimate = datestr(timeFromBeginning/86400, 'HH:MM:SS');
     
     % Affichage du tracé
     displayElevationFromDistance(trk);
     
-    disp(['L''estimation que l''on fait est : ', num2str(timeEstimate), '.']);
+    disp(['Estimation totale : ', num2str(timeEstimate), '.']);
 
 end
+
 
 

@@ -13,14 +13,6 @@
   <trk>
     <name>Trail l'Ardéchois - 57 kms</name>
     <trkseg>
-      <trkpt lon="4.518046639859676" lat="44.993108147755265">
-        <time>2011-04-30T05:31:11.000Z</time>
-        <extensions>
-          <gpxtpx:TrackPointExtension>
-            <gpxtpx:hr>118</gpxtpx:hr>
-          </gpxtpx:TrackPointExtension>
-        </extensions>
-      </trkpt>
       <trkpt lon="4.516207482665777" lat="44.995118295773864">
         <ele>474.0</ele>
         <time>2011-04-30T06:04:43.000Z</time>
